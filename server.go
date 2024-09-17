@@ -6,17 +6,15 @@ import (
 	"strings"
 )
 
-func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	// case insensitive path handling
+type PlayerStore interface {
+	GetPlayerScore(name string) int
+}
+
+type PlayerServer struct {
+	store PlayerStore
+}
+
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	player := strings.ToLower(strings.TrimPrefix(r.URL.Path, "/players/"))
-
-	if player == "Pepper" {
-		fmt.Fprint(w, "20")
-		return
-	}
-
-	if player == "floyd" {
-		fmt.Fprint(w, "10")
-		return
-	}
+	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
