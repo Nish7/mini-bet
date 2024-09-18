@@ -1,18 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 type StubPlayerStore struct {
-	scores map[string]int
+	scores   map[string]int
+	winCalls []string
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	score := s.scores[name]
 	return score
+}
+
+func (s *StubPlayerStore) RecordWins(name string) {
+	s.winCalls = append(s.winCalls, name)
 }
 
 func TestGetPlayers(t *testing.T) {
@@ -26,7 +32,7 @@ func TestGetPlayers(t *testing.T) {
 	server := &PlayerServer{store}
 
 	t.Run("returns peppers score", func(t *testing.T) {
-		request, _ := newGetScoreRequest("Pepper")
+		request, _ := newGetScoreRequest("pepper")
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
@@ -38,7 +44,7 @@ func TestGetPlayers(t *testing.T) {
 	})
 
 	t.Run("returns floyds score", func(t *testing.T) {
-		request, _ := newGetScoreRequest("Floyd")
+		request, _ := newGetScoreRequest("floyd")
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
@@ -61,11 +67,42 @@ func TestGetPlayers(t *testing.T) {
 	})
 }
 
+func TestStoreScores(t *testing.T) {
+	store := &StubPlayerStore{
+		map[string]int{},
+		nil,
+	}
+
+	server := &PlayerServer{store}
+
+	t.Run("it returns accepted on POST", func(t *testing.T) {
+		name := "Pepper"
+		request := newPostWinRequest(name)
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, request)
+
+		if len(store.winCalls) != 1 {
+			t.Errorf("got %d calls to RecordWins wanted %d calls", len(store.winCalls), 1)
+		}
+
+		if store.winCalls[0] != name {
+			t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], name)
+		}
+
+		assertStatusCode(t, response.Code, http.StatusAccepted)
+	})
+}
+
 func assertStatusCode(t *testing.T, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("Got status code %d wanted %d", got, want)
 	}
+}
+
+func newPostWinRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
+	return req
 }
 
 func newGetScoreRequest(name string) (*http.Request, error) {
