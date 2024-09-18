@@ -32,7 +32,7 @@ func TestGetPlayers(t *testing.T) {
 	server := &PlayerServer{store}
 
 	t.Run("returns peppers score", func(t *testing.T) {
-		request, _ := newGetScoreRequest("pepper")
+		request := newGetScoreRequest("pepper")
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
@@ -44,7 +44,7 @@ func TestGetPlayers(t *testing.T) {
 	})
 
 	t.Run("returns floyds score", func(t *testing.T) {
-		request, _ := newGetScoreRequest("floyd")
+		request := newGetScoreRequest("floyd")
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
@@ -56,7 +56,7 @@ func TestGetPlayers(t *testing.T) {
 	})
 
 	t.Run("returns 404 on missing players", func(t *testing.T) {
-		request, _ := newGetScoreRequest("Appollo")
+		request := newGetScoreRequest("Appollo")
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
@@ -105,9 +105,9 @@ func newPostWinRequest(name string) *http.Request {
 	return req
 }
 
-func newGetScoreRequest(name string) (*http.Request, error) {
-	req, err := http.NewRequest(http.MethodGet, "/players/"+name, nil)
-	return req, err
+func newGetScoreRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/players/"+name, nil)
+	return req
 }
 
 func assertResponseBody(t *testing.T, got, want string) {
