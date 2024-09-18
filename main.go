@@ -7,5 +7,5 @@ import (
 
 func main() {
 	handler := &PlayerServer{NewInMemoryPlayerStore()}
-	log.Fatal(http.ListenAndServe(":5000", handler))
+	log.Fatal(http.ListenAndServe(":3000", handler))
 }
