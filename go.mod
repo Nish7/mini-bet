@@ -1,3 +1,3 @@
-module github.com/nish7/mini-score/v2
+module github.com/nish7/mini-bet
 
 go 1.21.6

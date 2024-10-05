@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/nish7/mini-bet"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +16,7 @@ func main() {
 		log.Fatalf("problem opening %s %v", dbFileName, err)
 	}
 
-	store, _ := NewFileSystemPlayerStore(db)
-	handler := NewPlayerServer(store)
+	store, _ := poker.NewFileSystemPlayerStore(db)
+	handler := poker.NewPlayerServer(store)
 	log.Fatal(http.ListenAndServe(":3000", handler))
 }
